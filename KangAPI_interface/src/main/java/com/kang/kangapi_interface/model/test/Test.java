@@ -1,4 +1,4 @@
-package com.kang.kangapi_interface.model.dto;
+package com.kang.kangapi_interface.model.test;
 
 import lombok.Data;
 

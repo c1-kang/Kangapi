@@ -35,9 +35,6 @@ public class interfaceInfoController {
     private InterfaceinfoService interfaceInfoService;
 
     @Resource
-    private KangApiClient kangApiClient;
-
-    @Resource
     private UserService userService;
 
 
@@ -118,37 +115,29 @@ public class interfaceInfoController {
         return ResultUtils.success(result);
     }
 
-    @Operation(summary = "调用测试接口")
-    @GetMapping("/get")
-    public BaseResponse<Object> getName(HttpServletRequest request) {
-        // Get 请求
-        // String result = HttpUtil.get("127.0.0.1:7011/api/name/get/kanglanlan");
-
-        // Post 请求，自定义请求头
-        HashMap<String, Object> paramMap = new HashMap<>();
-
-        // 限定接口ID 2
-        long id = 2L;
-        Interfaceinfo interfaceinfo = interfaceInfoService.getById(id);
-        String requestParams = interfaceinfo.getRequestParams();
-
-        Gson gson = new Gson();
-        // Test test = gson.fromJson(requestParams, Test.class);
-        // String json = gson.toJson(test);
-
+    @Operation(summary = "调用接口")
+    @GetMapping("/get/{id}")
+    public BaseResponse<Object> getName(@PathVariable("id") long interfaceID, HttpServletRequest request) {
+        // 得到接口信息
+        Interfaceinfo interfaceinfo = interfaceInfoService.getById(interfaceID);
         String url = interfaceinfo.getUrl();
-
-        // Restful 请求
-        // HttpResponse resp = HttpRequest.post(url).body(requestParams).execute();
-        // String result = resp.body();
+        String method = interfaceinfo.getMethod();
+        String requestParams = interfaceinfo.getRequestParams();
 
         // 调用 Kang API Client
         User user = userService.getLoginUserAdmin(request);
         String accessKey = user.getAccessKey();
         String secretKey = user.getSecretKey();
-        KangApiClient tempClient = new KangApiClient(accessKey, secretKey);
-        Test test = gson.fromJson(requestParams, Test.class);
-        String result = tempClient.getNameByPost(test);
+        KangApiClient client = new KangApiClient(accessKey, secretKey);
+
+        // 不同请求方式，不同方法
+        String result = "";
+        if (method.equals("POST")) {
+            result = client.byPost(url, requestParams);
+        } else if (method.equals("GET")) {
+            // TODO get 请求有问题
+            result = client.byGet(url);
+        }
 
         return ResultUtils.success(result);
     }

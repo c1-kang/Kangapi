@@ -3,8 +3,7 @@ package com.kang.kangclientsdk.client;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
-import cn.hutool.json.JSONUtil;
-import com.kang.kangclientsdk.model.Test;
+import cn.hutool.http.HttpUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,26 +12,41 @@ import static com.kang.kangclientsdk.utils.genSignUtil.genSign;
 
 
 public class KangApiClient {
-    private final String accessKey;
-
-    private final String secretKey;
-
     private static final String PREFIX_URL = "http://localhost:7012/";
+    private final String accessKey;
+    private final String secretKey;
 
     public KangApiClient(String accessKey, String secretKey) {
         this.accessKey = accessKey;
         this.secretKey = secretKey;
     }
 
-    public String getNameByPost(Test test) {
-        String json = JSONUtil.toJsonStr(test);
+    /**
+     * post 请求
+     *
+     * @param url  接口地址
+     * @param json 请求参数
+     * @return 响应结果
+     */
+    public String byPost(String url, String json) {
 
         // 构建请求
-        HttpResponse resp = HttpRequest.post(PREFIX_URL + "name/post02")
+        HttpResponse resp = HttpRequest.post(url)
                 .addHeaders(getHeader(json))
                 .body(json)
                 .execute();
         return resp.body();
+    }
+
+    /**
+     * get 请求
+     *
+     * @param url 接口地址
+     * @return 结果
+     */
+    public String byGet(String url) {
+
+        return HttpUtil.get(url);
     }
 
     private Map<String, String> getHeader(String body) {
