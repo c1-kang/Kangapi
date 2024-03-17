@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: KangApiBackend
+  profiles:
+    active: dev
+  session:
+    store-type: redis
+    timeout: 2592000
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/kangapi01
+    username: root
+    password: 285828
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      database: 3
+      timeout: 3000
+      connectTimeout: 5000
+      password: 123456
+
+server:
+  port: 7010
+  servlet:
+    context-path: /api
+    session:
+      cookie:
+        max-age: 2592000
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: false
+
+kangapi:
+  client:
+    access-key: kang
+    secret-key: abcdefg
+
+dubbo:
+  application:
+    name: dubbo-springboot-provider
+  protocol:
+    name: dubbo
+    port: -1
+  registry:
+    address: nacos://localhost:8848

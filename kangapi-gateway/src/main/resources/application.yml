@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: kangapi-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: path_route_interface
+          uri: http://localhost:7011/
+
+          predicates:
+            - Path=/**
+server:
+  port: 7012
+
+logging:
+  level:
+    org:
+      springframework:
+        cloud:
+          gateway: trace
+
+dubbo:
+  application:
+    name: dubbo-springboot-consumer
+  protocol:
+    name: dubbo
+    port: -1
+  registry:
+    address: nacos://127.0.0.1:8848
