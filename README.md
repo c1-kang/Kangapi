@@ -3,4 +3,4 @@
 
 ### 架构
 
-![微服务架构.drawio](.\assets\微服务架构.drawio.png)
+![微服务架构.drawio](./assets/微服务架构.drawio.png)
