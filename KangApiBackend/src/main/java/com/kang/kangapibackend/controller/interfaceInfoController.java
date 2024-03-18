@@ -1,17 +1,16 @@
 package com.kang.kangapibackend.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.google.gson.Gson;
 import com.kang.kangapibackend.annotation.AuthCheck;
 import com.kang.kangapibackend.common.*;
 import com.kang.kangapibackend.exception.BusinessException;
 import com.kang.kangapibackend.model.dto.interfaceInfo.InterfaceInfoAddRequest;
 import com.kang.kangapibackend.model.dto.interfaceInfo.InterfaceInfoQueryPageRequest;
 import com.kang.kangapibackend.model.dto.interfaceInfo.InterfaceInfoQueryRequest;
+import com.kang.kangapibackend.model.dto.interfaceInfo.InvokeInterfaceRequest;
 import com.kang.kangapibackend.service.InterfaceinfoService;
 import com.kang.kangapibackend.service.UserService;
 import com.kang.kangclientsdk.client.KangApiClient;
-import com.kang.kangclientsdk.model.Test;
 import com.kang.model.entity.Interfaceinfo;
 import com.kang.model.entity.User;
 import com.kang.model.enums.InterfaceStatusEnum;
@@ -19,9 +18,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 接口管理
@@ -116,15 +116,23 @@ public class interfaceInfoController {
     }
 
     @Operation(summary = "调用接口")
-    @GetMapping("/get/{id}")
-    public BaseResponse<Object> getName(@PathVariable("id") long interfaceID, HttpServletRequest request) {
-        // 得到接口信息
-        Interfaceinfo interfaceinfo = interfaceInfoService.getById(interfaceID);
-        String url = interfaceinfo.getUrl();
-        String method = interfaceinfo.getMethod();
-        String requestParams = interfaceinfo.getRequestParams();
+    @PostMapping("/invoke")
+    public BaseResponse<Object> invokeInterface(@RequestBody InvokeInterfaceRequest invokeInterfaceRequest, HttpServletRequest request) {
+        long interfaceID = invokeInterfaceRequest.getId();
+        String requestQueryParams = invokeInterfaceRequest.getQueryParams();
 
-        // 调用 Kang API Client
+        // 得到接口信息
+        Interfaceinfo oldInterfaceInfo = interfaceInfoService.getById(interfaceID);
+        if (oldInterfaceInfo == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        if (oldInterfaceInfo.getStatus() == InterfaceStatusEnum.OFFLINE.getValue()) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "接口已关闭");
+        }
+        String url = oldInterfaceInfo.getUrl();
+        String method = oldInterfaceInfo.getMethod();
+
+        // 调用 API Client
         User user = userService.getLoginUserAdmin(request);
         String accessKey = user.getAccessKey();
         String secretKey = user.getSecretKey();
@@ -133,10 +141,10 @@ public class interfaceInfoController {
         // 不同请求方式，不同方法
         String result = "";
         if (method.equals("POST")) {
-            result = client.byPost(url, requestParams);
+            result = client.byPost(url, requestQueryParams);
         } else if (method.equals("GET")) {
-            // TODO get 请求有问题
-            result = client.byGet(url);
+            // 拼接 url
+            result = client.byGet(url + requestQueryParams);
         }
 
         return ResultUtils.success(result);
