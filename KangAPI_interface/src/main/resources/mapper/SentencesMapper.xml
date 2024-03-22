@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kang.kangapi_interface.mapper.SentencesMapper">
+
+    <resultMap id="BaseResultMap" type="com.kang.kangapi_interface.model.entity.Sentences">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="uuid" column="uuid" jdbcType="VARCHAR"/>
+            <result property="hitokoto" column="hitokoto" jdbcType="VARCHAR"/>
+            <result property="type" column="type" jdbcType="VARCHAR"/>
+            <result property="source" column="source" jdbcType="VARCHAR"/>
+            <result property="from_who" column="from_who" jdbcType="VARCHAR"/>
+            <result property="length" column="length" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,uuid,hitokoto,
+        type,source,from_who,
+        length
+    </sql>
+</mapper>

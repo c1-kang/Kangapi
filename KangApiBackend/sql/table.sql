@@ -49,3 +49,15 @@ CREATE TABLE user_interfaceInfo
     updateTime  datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT "更新时间",
     isDelete    TINYINT  NOT NULL DEFAULT 0 COMMENT "是否删除"
 ) COMMENT "用户接口表";
+
+CREATE TABLE user
+(
+    id       BIGINT       NOT NULL AUTO_INCREMENT COMMENT "ID",
+    uuid     VARCHAR(56)  NOT NULL COMMENT "uuid",
+    hitokoto VARCHAR(512) NOT NULL COMMENT "句子",
+    type     VARCHAR(4)   NOT NULL COMMENT "类别",
+    source   VARCHAR(256) COMMENT "来源",
+    from_who VARCHAR(64) COMMENT "来源于谁",
+    length   int COMMENT "长度",
+    PRIMARY KEY (`id`) USING BTREE
+);

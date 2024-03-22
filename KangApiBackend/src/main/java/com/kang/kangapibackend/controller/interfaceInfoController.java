@@ -18,10 +18,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 接口管理
@@ -139,7 +136,7 @@ public class interfaceInfoController {
         KangApiClient client = new KangApiClient(accessKey, secretKey);
 
         // 不同请求方式，不同方法
-        String result = "";
+        Object result = "";
         if (method.equals("POST")) {
             result = client.byPost(url, requestQueryParams);
         } else if (method.equals("GET")) {
@@ -148,5 +145,31 @@ public class interfaceInfoController {
         }
 
         return ResultUtils.success(result);
+    }
+
+    @Operation(summary = "图片接口")
+    @GetMapping("/image/{id}")
+    public Object getImage(@PathVariable("id") long id, HttpServletRequest request) {
+        String queryString = request.getQueryString();
+
+        // 得到接口信息
+        Interfaceinfo oldInterfaceInfo = interfaceInfoService.getById(id);
+        if (oldInterfaceInfo == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        if (oldInterfaceInfo.getStatus() == InterfaceStatusEnum.OFFLINE.getValue()) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "接口已关闭");
+        }
+        String url = oldInterfaceInfo.getUrl();
+
+        // 调用 API Client
+        User user = userService.getLoginUserAdmin(request);
+        String accessKey = user.getAccessKey();
+        String secretKey = user.getSecretKey();
+        KangApiClient client = new KangApiClient(accessKey, secretKey);
+        if (queryString != null) {
+            url += queryString;
+        }
+        return client.getImage(url);
     }
 }
